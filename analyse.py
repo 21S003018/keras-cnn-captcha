@@ -52,8 +52,8 @@ def train(epochs = 100):
 
 def predict():
     # 基于模型的预测--the 5th core step
-    model_path = 'model/11.hdf5'
-    pic_path = 'samples/HCMYT.jpg'
+    model_path = 'model/11.hdf5' # 已经提前配置好了模型的存储路径，可改！
+    pic_path = 'samples/HCMYT.jpg' # 测试用例，可改！
     model = keras.models.load_model(model_path)
     data = np.empty((5, 40, 40, 3), dtype="uint8")
     raw_img = preprocess.load_img(pic_path)
@@ -65,9 +65,10 @@ def predict():
 
 
 if __name__ == '__main__':
-    input('友情提示，在开始运行之前，最好确保项目所在路径为全英文路径！如果已经确认无误，输入任意键+Enter即开始执行程序')
-    generate_pic(num=1000) # 如果是第一次运行，需要生成一些训练数据,使用这行代码即可
-    his = train(epochs=100) # 如果需要训练数据，使用这行代码即可,可以指定训练的轮数
+    input('友情提示，在开始运行之前，最好确保项目所在路径为全英文路径！\n如果已经确认无误，输入任意键+Enter即开始执行程序')
+    generate_pic(num=1000) # 如果是第一次运行，需要生成一些训练数据,使用这行代码即可,如果data文件夹下已经有训练数据，可以把这行注释掉
+    his = train(epochs=100) # 如果需要训练数据，使用这行代码即可,可以指定训练的轮数，如果已经训练好，直接调用predict函数就行
+    print('predict的模型读取路径可改，用例路径可改，移步predict函数即可')
     ans = predict() # 预测的结果比较抽象，需要处理一下，调用parse_answer函数即可
     # 数据后处理--the 6th core step
     # print(his.history) # metrics结果，配合train函数使用
