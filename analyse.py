@@ -8,8 +8,10 @@ from keras.callbacks import Callback, ModelCheckpoint
 from keras.models import Model
 from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
-from utils import load_data, APPEARED_LETTERS,generate_pic,parse_answer,pic_folder,weight_folder
+from utils import load_data, APPEARED_LETTERS,generate_pic,parse_answer,pic_folder,weight_folder,backup_model
 import preprocess
+from experiment import get_model
+import traceback
 
 # 定义文件路径
 def train(epochs = 100):
@@ -23,16 +25,18 @@ def train(epochs = 100):
     # x_train,y_train,x_test,y_test 是表示神经网络的输入输出的常用表示
     x_train, y_train, x_test, y_test = data_train, label_categories_train,data_test, label_categories_test
     # 定义神经网络结构--the 2nd core step
-    inputs = layers.Input((40, 40, 3)) # 定义输入层
-    x = layers.Conv2D(32, 9, activation='relu')(inputs)
-    x = layers.Conv2D(32, 9, activation='relu')(x)
-    x = layers.MaxPool2D((2, 2))(x)
-    x = layers.Dropout(0.25)(x)
-    x = layers.Flatten()(x)
-    x = layers.Dense(640)(x)
-    x = layers.Dropout(0.5)(x)
-    out = layers.Dense(len(APPEARED_LETTERS), activation='softmax')(x) # 定义输出层
-    model = Model(inputs=inputs, outputs=out)
+    model = None
+    try:
+        model = get_model()
+    except Exception as e:
+        print('The model you defined has some bugs')
+        print(traceback.print_exc())
+        choice = input('backup model will be used, please input 1 for continuing,0 for stopping the program.')
+        if choice == 1:
+            model = backup_model()
+        elif choice == 0:
+            print('exit!')
+            exit()
     # 编译模型--the 3rd core step
     model.compile(
         optimizer='adadelta',
@@ -52,8 +56,8 @@ def train(epochs = 100):
 
 def predict():
     # 基于模型的预测--the 5th core step
-    model_path = 'model/11.hdf5' # 已经提前配置好了模型的存储路径，可改！
-    pic_path = 'samples/HCMYT.jpg' # 测试用例，可改！
+    model_path = 'model/11.hdf5'
+    pic_path = 'samples/HCMYT.jpg'
     model = keras.models.load_model(model_path)
     data = np.empty((5, 40, 40, 3), dtype="uint8")
     raw_img = preprocess.load_img(pic_path)
@@ -65,10 +69,9 @@ def predict():
 
 
 if __name__ == '__main__':
-    input('友情提示，在开始运行之前，最好确保项目所在路径为全英文路径！\n如果已经确认无误，输入任意键+Enter即开始执行程序')
-    generate_pic(num=1000) # 如果是第一次运行，需要生成一些训练数据,使用这行代码即可,如果data文件夹下已经有训练数据，可以把这行注释掉
-    his = train(epochs=100) # 如果需要训练数据，使用这行代码即可,可以指定训练的轮数，如果已经训练好，直接调用predict函数就行
-    print('predict的模型读取路径可改，用例路径可改，移步predict函数即可')
+    input('友情提示，在开始运行之前，最好确保项目所在路径为全英文路径！如果已经确认无误，输入任意键+Enter即开始执行程序')
+    generate_pic(num=1000) # 如果是第一次运行，需要生成一些训练数据,使用这行代码即可
+    his = train(epochs=100) # 如果需要训练数据，使用这行代码即可,可以指定训练的轮数
     ans = predict() # 预测的结果比较抽象，需要处理一下，调用parse_answer函数即可
     # 数据后处理--the 6th core step
     # print(his.history) # metrics结果，配合train函数使用

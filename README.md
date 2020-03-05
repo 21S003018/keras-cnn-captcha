@@ -1,8 +1,5 @@
 # keras-cnn-captcha
-download the project and then open analyse.py directly.<br/>
-analyse.py contains the main programs and an example!<br/>
-generator.py contains the training data generator!<br/>
-preprocess.py and utils.py contain some assisting method！<br/>
-<br/>
-### use commandline "python analyse.py" to begin it!<br/>
-<br/>
+this example can be used to train the usage of Model model
+you change **get_model() method in experiment.py** to change the structure of your model.
+After you finish your defination, you can run analyse.py to test your model!
+Happy day!

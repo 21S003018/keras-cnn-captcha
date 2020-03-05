@@ -3,6 +3,8 @@ import cv2
 import numpy as np
 import preprocess
 from generator import Captcha
+from keras import layers
+from keras.models import Model
 
 APPEARED_LETTERS = [
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',
@@ -45,7 +47,7 @@ def generate_pic(num):
     :return:
     '''
     ans = input('本次运行将会新产生1000组随机样例\n确认请输入1，不生成请输入0')
-    if ans == 0:
+    if int(ans) == 0:
         return
     letters = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',
     'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'U', 'V', 'W',
@@ -67,3 +69,16 @@ def parse_answer(lis):
             i += 1
         ans += char
     return ans
+
+def backup_model():
+    inputs = layers.Input((40, 40, 3)) # 定义输入层
+    x = layers.Conv2D(32, 9, activation='relu')(inputs)
+    x = layers.Conv2D(32, 9, activation='relu')(x)
+    x = layers.MaxPool2D((2, 2))(x)
+    x = layers.Dropout(0.25)(x)
+    x = layers.Flatten()(x)
+    x = layers.Dense(640)(x)
+    x = layers.Dropout(0.5)(x)
+    out = layers.Dense(len(APPEARED_LETTERS), activation='softmax')(x) # 定义输出层
+    model = Model(inputs=inputs, outputs=out)
+    return model
